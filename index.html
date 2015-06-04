@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<link href="css/jquery-ui.css" rel="stylesheet">
+<link href="css/jquery.mobile-1.4.5.min.css" rel="stylesheet">
+<link href="css/jquery.mobile.theme-1.4.5.min.css" rel="stylesheet">
+
+<script src="js/jquery-ui.js" type="text/javascript"></script>
+<script src="js/jquery.min.js" type="text/javascript"></script>
+<script src="js/jquery.mobile-1.4.5.min.js" type="text/javascript"></script>
+
+
+
+<style type="text/css">
+    p{
+        text-align: center;
+    }
+</style>
+<script type="text/javascript">
+$(document).ready(function inicio(){
+    var btnGuardar=$("#btnGuardar");
+    btnGuardar.click(function guardarDato(){
+        
+   
+    var nom=$("#nombre").val();
+    var presio=$("#presio").val();
+    var descrip=$("#descripcion").val();
+    alert("nombre="+nom+"&presio="+presio+"&descripcion="+descrip);
+    
+    
+    $.ajax({
+        type: "POST",
+        url: "guardar.php",
+        data:"nombre="+nom+"&presio="+presio+"&descripcion="+descrip,
+        success: datosGuardados
+    });
+    function datosGuardados (datos){
+        alert("Respuesta:"+datos);
+    }
+    
+    }); 
+    
+     var btnGuardar2=$("#btnGuardar2");
+    btnGuardar2.click(function guardarDato2(){
+        
+   
+    var nom=$("#nombre2").val();
+    var apellido=$("#apellido").val();
+    var edad=$("#edad").val();
+    alert("nombre2="+nom+"&apellido="+apellido+"&edad="+edad);
+    
+    
+    $.ajax({
+        type: "POST",
+        url: "guardar2.php",
+        data:"nombre2="+nom+"&apellido="+apellido+"&edad="+edad,
+        success: datosGuardados2
+    });
+    function datosGuardados2 (datos){
+        alert("Respuesta:"+datos);
+    }
+    
+    }); 
+    
+    var btnConsultar=$("#btnConsultar");
+    btnConsultar.click(function consultas(){
+       // alert("hola");
+        $.ajax({
+        type: "POST",
+        url: "ConsultarTodos.php",
+        data:"",
+        success: ConsultarTodo
+       });     
+        
+       function ConsultarTodo(datos){
+           //alert("Respuesta: "+ datos);
+           var respDatos=$.parseJSON(datos);   
+           var respuesta=$("#resConDatos");
+           dibujarTabla(respuesta, respDatos);
+       }
+        
+        
+    });
+          function dibujarTabla(respuesta, respDatos){
+           if(respDatos!=0){
+          respuesta.html("");
+            respuesta.append('<table id="tab" border="1">');
+            var tabla=$("#tab");
+            tabla.html("<tr><th>ID Producto</th><th>NombreP</th><th>Presio</th><th>Descripcion</th></tr>");
+            for(var i in respDatos){
+              tabla.append("<tr><td>"+respDatos[i].Id_producto+"</td>"
+              +"<td>"+respDatos[i].NombreP+"</td>"
+              +"<td>"+respDatos[i].Presio+"</td>"
+              +"<td>"+respDatos[i].Descripcion+"</td></tr>");
+            }
+            tabla.append("</table>");
+            }else{
+          respuesta.html('<p>No existen registros</p>');
+          }
+          }
+          
+       var consultar2=$("#btnconsultar2");
+        consultar2.click(function cons2(){
+        var valConsulta=$("#valConsulta").val();
+        
+       
+          $.ajax({
+            type:"POST",
+             url:"consultaBD2.php",
+            data:"Id="+valConsulta,
+            success: consultaEstudiante
+          });
+          
+          function consultaEstudiante(datos){
+          var respDatos2=$.parseJSON(datos);   
+          var respuesta2=$("#resconsulta2");
+          dibujarTabla(respuesta2, respDatos2);
+          }
+        });
+        
+        //actualizar
+        
+        var btnConsAct=$("#btnConsAct");
+        btnConsAct.click(function cargarDat(){  
+          $.ajax({
+          type:"POST",
+          url:"consultarTodos.php",
+          data:"",
+          success: cargarDatos
+          });
+
+          function cargarDatos(datos){   
+            var respCarga=$.parseJSON(datos);       
+            var respConAct=$("#respConAct");      
+            dibujarTabla(respConAct,respCarga);
+          }
+        });
+
+        var btnCarDatos=$("#btnCarDatos");
+        btnCarDatos.click(function cargarInf(){
+        var Id=parseInt($("#nomActualizar").val());
+          $.ajax({
+          type:"POST",
+           url:"consultaBD2.php",
+          data:"Id="+Id,
+          success: cargarDatosAct
+          });
+
+          function cargarDatosAct(datos){
+            var consDatAct=$.parseJSON(datos);
+            var respCargDatos=$("#respCargDatos");//Div del resultado para dibujar controles
+             if(consDatAct!=0){ 
+            respCargDatos.html("<label>ID:</label><input type='text' id='Id' disabled='yes'>");
+            respCargDatos.append("<label>NombreP:</label><input type='text' id='nom'>");
+            respCargDatos.append("<label>Precio:</label><input type='text' id='pre'>");
+            
+            respCargDatos.append("<label>Descripcion:</label><input type='text' id='des'>");
+            var Id=$("#Id");
+            var nom=$("#nom");
+            var pre=$("#pre");
+          
+            var des=$("#des");
+            for(var i in consDatAct){
+              Id.val(consDatAct[i].Id_producto);
+              nom.val(consDatAct[i].NombreP);
+              pre.val(consDatAct[i].Presio);
+             
+              des.val(consDatAct[i].Descripcion);
+             }   
+        }else{
+        respCargDatos.html('<p>No existen registros</p>');
+        }
+          }
+         });
+
+         var btnGuarDatos=$("#btnGuarDatos");
+            btnGuarDatos.click(function actual(){
+
+            var id=parseInt($("#Id").val());
+
+            var nombre=$("#nom").val();
+
+            var precio=$("#pre").val();
+
+           
+
+            var descripcion=$("#des").val();
+
+
+            if(nombre=="" || precio=="" || descripcion=="" ){
+              alert("Ingresa información en todos los campos");
+            }else{
+              $.ajax({
+                type:"POST",
+              url:"actualizar.php",
+                data:"id="+id+"&nombre="+nombre+"&precio="+precio+"&descripcion="+descripcion,
+                success: actualizacion
+
+              });
+
+            }   
+            function actualizacion(datos){
+                alert("datos:"+datos);
+              }
+   });//termina actualizar
+   //eliminar
+var btnConsEliminar=$("#btnConsEliminar");
+  btnConsEliminar.click(function conEliminar(){  
+    $.ajax({
+    type:"POST",
+    url:"consultarTodos.php",
+    data:"",
+    success: consultaAntEliminar
+    });
+    
+    function consultaAntEliminar(datos){   
+      var datAntesEliminar=$.parseJSON(datos);       
+      var respConElim=$("#respConElim");      
+      dibujarTabla(respConElim,datAntesEliminar);
+    }
+  });
+  
+
+   var btnEliminar=$("#btnEliminar");
+   
+      btnEliminar.click(function actual(){
+      var idEliminar=parseInt($("#idEliminar").val());
+      
+	$.ajax({
+	  type:"POST",
+	  url:"eliminar.php",
+	  data:"id="+idEliminar,
+	  success: eliminacion
+	});
+		  
+      function eliminacion(datos){
+	  alert(datos);
+	}
+   });//termina eliminar
+});
+
+</script>
+</head>
+<body>
+<div data-role="page" id="principal">
+    <div data-role="header">
+        <p>Principal</p>
+    </div>
+    <div data-role="content">
+       <p>Contenido</p> 
+       <ul data-role="listview">
+           <li><a href="#registrar" data-transition="slidedown"> Registrar Producto</a>  </li>
+           <li><a href="#registrar2" data-transition="slidedown"> Registrar Cliente</a>  </li>
+           <li><a href="#consultar" data-transition="slidedown"> Consultar Productos</a>  </li>
+           <li><a href="#consulta2" data-transition="slidedown" >Consultar uno</a></li>
+           <li><a href="#actualizar" data-transition="slidedown" >Actualizar</a></li>
+           <li><a href="#eliminar" data-transition="flip" >Eliminar</a></li>
+           
+       </ul>
+    </div>
+    <div data-role="footer">
+        <p>Pie de página</p>
+    </div>
+</div> 
+    <div data-role="page" id="registrar">
+    <div data-role="header">
+        <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Registrar</p>
+    </div>
+    <div data-role="content">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre">
+        <label for="presio">Presio:</label>
+        <input type="text" id="presio">
+        <label for="descripcion">Descripcion:</label>
+        <input type="text" id="descripcion">
+        <input type="button" id="btnGuardar" value="Guardar">
+    </div>
+    <div data-role="footer">
+        <p>Pie de página</p>
+    </div>
+</div> 
+    
+    <div data-role="page" id="registrar2">
+    <div data-role="header">
+        <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Registrar</p>
+    </div>
+    <div data-role="content">
+        <label for="nombre2">Nombre:</label>
+        <input type="text" id="nombre2">
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido">
+        <label for="edad">Edad:</label>
+        <input type="text" id="edad">
+        <input type="button" id="btnGuardar2" value="Guardar">
+    </div>
+    <div data-role="footer">
+        <p>Pie de página</p>
+    </div>
+</div> 
+    
+    
+            <div data-role="page" id="consultar">
+           <div data-role="header">
+        <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Consultar</p>
+    </div>
+           <div data-role="content">
+                <input type="button" id="btnConsultar" value="Mostrar todos los registros">
+            <div id="resConDatos"> </div>
+           
+        </div>
+        <div data-role="footer">
+            <p>Pie de página</p>
+        </div>
+            </div>
+    
+        <div data-role="page" id="consulta2">
+        <div data-role="header" >
+        <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Consultar Producto</p>
+        </div>
+        <div data-role="content">
+              <label for="valConsulta">Id:</label>
+              <input type="text" id="valConsulta" >
+              <input type="button" id="btnconsultar2" value="Consultar">
+              <div id="resconsulta2"></div>
+            </div>
+            <div data-role="footer">
+            <p>Derechos reservados</p>
+            </div>
+          </div>
+        <div data-role="page" id="actualizar">
+        <div data-role="header" >
+              <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Actualizar registros</p>
+        </div>
+            <div data-role="content">
+              <input type="button" id="btnConsAct" value="Mostrar todos los registros">
+              <div id="respConAct"></div>
+              <label for="nomActualizar">ID a actualizar</label>
+              <input type="text" id="nomActualizar" >
+              <input type="button" id="btnCarDatos" value="Cargar Datos">
+              <div id="respCargDatos"></div>
+              <input type="button" id="btnGuarDatos" value="Guardar Datos">
+            </div>
+            <div data-role="footer">
+            <p>Derechos reservados</p>
+           </div>
+        </div>
+    
+    
+    <div data-role="page" id="eliminar">
+        <div data-role="header" >
+          <p><a href="#principal" data-role="button" data-transition="slideup"> Regresar</a><br/>Eliminar Productos</p>
+        </div>
+        <div data-role="content">
+          <input type="button" id="btnConsEliminar" value="Mostrar todos los registros">
+          <div id="respConElim"></div>
+          <label for="idEliminar">ID a eliminar</label>
+          <input type="text" id="idEliminar" >
+          <!--input type="button" id="btnCarDatosElim" value="Cargar Datos"-->
+          <!--div id="respCargDatos2"></div-->
+          <input type="button" id="btnEliminar" value="Eliminar Datos">
+        </div>
+        <div data-role="footer">
+        <p>Derechos reservados</p>
+        </div>
+      </div>
+
+    
+</body>
+</html>
